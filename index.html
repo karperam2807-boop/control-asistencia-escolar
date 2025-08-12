@@ -69,11 +69,77 @@
                     📤 Exportar Datos
                 </button>
             </div>
+
+            <!-- Nuevos botones de herramientas -->
+            <div class="nav-buttons" style="margin-top: 15px;">
+                <button id="generatorBtn" class="nav-btn" style="background: linear-gradient(135deg, #ff9a9e, #fecfef);">
+                    🎫 Generar Códigos QR
+                </button>
+                <button id="helpBtn" class="nav-btn" style="background: linear-gradient(135deg, #a8edea, #fed6e3);">
+                    ❓ Ayuda
+                </button>
+            </div>
         </main>
     </div>
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
     <script src="app.js"></script>
+    
+    <script>
+        // Event listener para el botón del generador
+        document.addEventListener('DOMContentLoaded', function() {
+            const generatorBtn = document.getElementById('generatorBtn');
+            const helpBtn = document.getElementById('helpBtn');
+            
+            if (generatorBtn) {
+                generatorBtn.addEventListener('click', function() {
+                    window.location.href = 'generador.html';
+                });
+            }
+            
+            if (helpBtn) {
+                helpBtn.addEventListener('click', function() {
+                    showHelpModal();
+                });
+            }
+        });
+        
+        // Función de ayuda
+        function showHelpModal() {
+            const helpContent = `
+🏫 SISTEMA DE CONTROL DE ASISTENCIA ESCOLAR
+
+📱 CÓMO USAR:
+1. Escanear código QR del estudiante
+2. Primera lectura = ENTRADA
+3. Segunda lectura = SALIDA
+4. Ver reportes por fecha
+5. Exportar datos en Excel
+
+🎫 GENERAR CÓDIGOS QR:
+- Individual: Un estudiante a la vez
+- Masivo: Lista completa en CSV
+- Formato: matricula,nombre,grado,grupo
+
+📊 REPORTES:
+- Estadísticas diarias
+- Filtros por fecha
+- Exportación automática
+
+💡 CONSEJOS:
+- Mantén buena iluminación para escanear
+- Los datos se guardan automáticamente
+- Funciona sin internet después de cargar
+
+❓ ¿PROBLEMAS?
+- Verifica permisos de cámara
+- Asegúrate de usar HTTPS
+- Contacta al administrador
+            `;
+            
+            alert(helpContent);
+        }
+    </script>
 </body>
 </html>
