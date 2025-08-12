@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control de Asistencia Escolar</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#4285f4">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Asistencia Escolar">
+</head>
+<body>
+    <div class="app-container">
+        <header class="app-header">
+            <h1>🏫 Control de Asistencia</h1>
+            <div class="date-display" id="currentDate"></div>
+        </header>
+
+        <main class="main-content">
+            <!-- Botón principal para escanear QR -->
+            <div class="scan-section">
+                <button id="scanButton" class="scan-btn">
+                    📷 Escanear Código QR
+                </button>
+                <div id="camera-container" class="camera-container hidden">
+                    <video id="video" autoplay></video>
+                    <canvas id="canvas" class="hidden"></canvas>
+                    <button id="stopScanBtn" class="stop-btn">❌ Cerrar Cámara</button>
+                </div>
+            </div>
+
+            <!-- Sección de estadísticas del día -->
+            <div class="stats-section">
+                <h2>📊 Estadísticas de Hoy</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalStudents">0</div>
+                        <div class="stat-label">Estudiantes</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalEntries">0</div>
+                        <div class="stat-label">Entradas</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalExits">0</div>
+                        <div class="stat-label">Salidas</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lista de registros del día -->
+            <div class="records-section">
+                <h2>📝 Registros de Hoy</h2>
+                <div id="recordsList" class="records-list">
+                    <div class="no-records">
+                        No hay registros aún. ¡Escanea el primer código QR!
+                    </div>
+                </div>
+            </div>
+
+            <!-- Botones de navegación -->
+            <div class="nav-buttons">
+                <button id="reportsBtn" class="nav-btn">
+                    📈 Ver Reportes
+                </button>
+                <button id="exportBtn" class="nav-btn">
+                    📤 Exportar Datos
+                </button>
+            </div>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
