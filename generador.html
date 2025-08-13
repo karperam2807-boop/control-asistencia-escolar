@@ -230,7 +230,19 @@
         </main>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <!-- Librerías QR - versión corregida -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.5.3/qrcode.min.js"></script>
+    <script>
+        // Verificar que QRCode se cargó correctamente
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof QRCode === 'undefined') {
+                console.error('❌ QRCode library failed to load');
+                alert('Error: No se pudo cargar la librería de códigos QR. Verifica tu conexión a internet.');
+            } else {
+                console.log('✅ QRCode library loaded successfully');
+            }
+        });
+    </script>
     <script src="generador.js"></script>
 </body>
 </html>
