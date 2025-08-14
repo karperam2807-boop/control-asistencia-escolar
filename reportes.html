@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reportes de Asistencia - CETIS No. 45</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="reports-container">
+        <header class="app-header">
+            <!-- Header institucional -->
+            <div class="institutional-header">
+                <div class="logo-placeholder">SEP</div>
+                
+                <div class="institution-info">
+                    <div class="institution-name">CETIS No. 45</div>
+                    <div class="institution-subtitle">Centro de Estudios Tecnológicos Industrial y de Servicios</div>
+                </div>
+                
+                <div class="logo-placeholder">DGETI</div>
+            </div>
+            
+            <h1 class="reports-title">📊 Reportes de Asistencia</h1>
+            <a href="index.html" class="back-btn">← Volver al Control de Asistencia</a>
+        </header>
+
+        <main class="main-content">
+            <!-- Selector de fecha mejorado -->
+            <div class="date-selector">
+                <label for="dateInput">📅 Seleccionar fecha:</label>
+                <input type="date" id="dateInput" class="date-input">
+                <button id="filterBtn" class="filter-btn">🔍 Filtrar</button>
+                <button id="todayBtn" class="filter-btn">📅 Hoy</button>
+                <button id="weekBtn" class="filter-btn">📆 Esta semana</button>
+            </div>
+
+            <!-- Estadísticas destacadas -->
+            <div class="stats-highlight">
+                <h3>📈 Resumen de Asistencia</h3>
+                <div class="summary-cards">
+                    <div class="summary-card">
+                        <div class="summary-number" id="summaryStudents">0</div>
+                        <div class="summary-label">👥 Estudiantes únicos</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-number" id="summaryPresent">0</div>
+                        <div class="summary-label">✅ Presentes</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-number" id="summaryComplete">0</div>
+                        <div class="summary-label">🔄 Entrada y salida</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-number" id="summaryPercentage">0%</div>
+                        <div class="summary-label">📊 % Asistencia</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabla de reportes -->
+            <h2 class="section-title">📋 Detalle de Registros</h2>
+            <div class="report-table">
+                <div class="table-header">
+                    <div><strong>👤 Estudiante</strong></div>
+                    <div><strong>🎓 Grado</strong></div>
+                    <div><strong>🟢 Entrada</strong></div>
+                    <div><strong>🔴 Salida</strong></div>
+                    <div><strong>📊 Estado</strong></div>
+                </div>
+                <div id="reportTableBody">
+                    <div class="no-data">
+                        <h3>📊 Reportes CETIS No. 45</h3>
+                        <p><strong>Selecciona una fecha para visualizar los registros de asistencia</strong></p>
+                        <p>Los datos se actualizan automáticamente</p>
+                        <small>#OrgullosamenteCETIS45</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Botones de exportación -->
+            <div class="export-buttons">
+                <button id="exportPdfBtn" class="export-btn">
+                    📄 Exportar PDF
+                </button>
+                <button id="exportExcelBtn" class="export-btn">
+                    📊 Exportar Excel
+                </button>
+                <button id="printReportBtn" class="export-btn">
+                    🖨️ Imprimir Reporte
+                </button>
+            </div>
+        </main>
+    </div>
+
+    <script src="reportes.js"></script>
+</body>
+</html>
