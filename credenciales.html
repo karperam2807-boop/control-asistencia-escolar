@@ -85,8 +85,8 @@
         }
         
         .credential {
-            width: 55mm;  /* 5.5 cm - MISMO TAMAÑO QUE MASIVAS */
-            height: 85mm; /* 8.5 cm - MISMO TAMAÑO QUE MASIVAS */
+            width: 55mm;  /* 5.5 cm EXACTO */
+            height: 85mm; /* 8.5 cm EXACTO */
             background: linear-gradient(135deg, #8b1538, #a91d47);
             border: 2px solid #d4af37;
             border-radius: 6px;
@@ -95,7 +95,8 @@
             color: white;
             font-family: Arial, sans-serif;
             margin: 20px auto;
-            transform: scale(2.0); /* Escala solo para vista previa */
+            /* SIN ESCALA - TAMAÑO REAL */
+            transform: none;
             -webkit-print-color-adjust: exact;
             color-adjust: exact;
             print-color-adjust: exact;
@@ -120,17 +121,20 @@
         .credential-logo {
             width: 4mm;
             height: 4mm;
-            background: rgba(255,255,255,0.9);
+            background: #FFFFFF; /* Fondo blanco sólido */
             border: 1px solid #d4af37;
             border-radius: 50%;
             font-size: 2.5px;
-            font-weight: bold;
+            font-weight: 900; /* Extra bold */
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #8b1538;
+            color: #8b1538; /* Color vino para contrastar */
             text-shadow: none;
             box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+            /* Forzar visibilidad */
+            opacity: 1;
+            z-index: 10;
         }
         
         .credential-institution {
@@ -277,7 +281,8 @@
                 -webkit-print-color-adjust: exact !important;
                 color-adjust: exact !important;
                 print-color-adjust: exact !important;
-                transform: scale(2.2) !important; /* Credencial más grande en impresión */
+                /* MANTENER TAMAÑO REAL EN IMPRESIÓN */
+                transform: scale(1.5) !important; /* Solo un poco más grande para impresión */
             }
             
             .qr-section {
@@ -295,13 +300,12 @@
                 print-color-adjust: exact !important;
             }
             
-            /* QR extra grande para credenciales */
-            .credential .qr-code-img {
-                width: 25mm !important;
-                height: 25mm !important;
-                min-width: 25mm !important;
-                min-height: 25mm !important;
-                border: 4px solid #000000 !important;
+            /* Logos visibles en impresión */
+            .credential-logo {
+                background: #FFFFFF !important;
+                color: #000000 !important;
+                border: 2px solid #000000 !important;
+                font-weight: 900 !important;
             }
         }
         
@@ -451,7 +455,10 @@
 
             <!-- Vista previa de credencial -->
             <div id="credentialPreview" class="credential-preview hidden">
-                <h3 class="section-title">🎫 Credencial Generada (5.5 x 8.5 cm)</h3>
+                <h3 class="section-title">🎫 Credencial Generada - TAMAÑO REAL: 5.5 x 8.5 cm</h3>
+                <p style="text-align: center; color: #8b1538; font-weight: 600; margin-bottom: 15px;">
+                    📏 Vista previa en tamaño real | 🏛️ Con logos oficiales SEP y DGETI
+                </p>
                 
                 <div class="credential" id="credential">
                     <div class="credential-header">
@@ -665,8 +672,8 @@
                 behavior: 'smooth' 
             });
             
-            // Notificación actualizada
-            showNotification(`✅ Credencial 5.5x8.5cm generada para ${studentData.nombre}\n🏛️ Con logos oficiales: SEP, CETIS 45 y DGETI\n📱 QR 13mm x 13mm (mismo tamaño que masivas)\n🔧 600px con máximo contraste\n🖨️ Lista para impresión profesional`, 'success');
+            // Notificación corregida
+            showNotification(`✅ Credencial TAMAÑO REAL generada: ${studentData.nombre}\n📏 Dimensiones: 5.5 x 8.5 cm (sin escala)\n🏛️ Logos oficiales: SEP y DGETI visibles\n📱 QR 13mm x 13mm optimizado\n🖨️ Lista para impresión profesional`, 'success');
         }
 
         // Imprimir credencial con QR de máxima calidad
