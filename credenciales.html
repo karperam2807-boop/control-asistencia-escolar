@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador de Credenciales - CETIS No. 45</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .generator-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+        }
+        
+        .form-section {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            border-left: 4px solid #8b1538;
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .form-group label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #8b1538;
+        }
+        
+        .form-input {
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s ease;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #8b1538;
+            box-shadow: 0 0 0 3px rgba(139, 21, 56, 0.1);
+        }
+        
+        .generate-btn {
+            background: linear-gradient(135deg, #8b1538, #a91d47);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.1em;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 600;
+            width: 100%;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(139, 21, 56, 0.3);
+            border: 2px solid #d4af37;
+        }
+        
+        .generate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(139, 21, 56, 0.4);
+            background: linear-gradient(135deg, #a91d47, #8b1538);
+        }
+        
+        .credential-preview {
+            text-align: center;
+            padding: 30px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-bottom: 25px;
+            border: 2px solid #d4af37;
+        }
+        
+        .credential {
+            width: 320px;
+            height: 200px;
+            background: linear-gradient(135deg, #8b1538, #a91d47);
+            border: 3px solid #d4af37;
+            border-radius: 15px;
+            position: relative;
+            overflow: hidden;
+            margin: 20px auto;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+        
+        .credential-header {
+            background: rgba(212, 175, 55, 0.2);
+            padding: 8px;
+            text-align: center;
+            border-bottom: 2px solid #d4af37;
+        }
+        
+        .credential-logos {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+        
+        .credential-logo {
+            width: 20px;
+            height: 20px;
+            background: rgba(255,255,255,0.3);
+            border: 1px solid #d4af37;
+            border-radius: 3px;
+            font-size: 8px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #d4af37;
+        }
+        
+        .credential-institution-name {
+            color: #d4af37;
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 2px;
+        }
+        
+        .credential-institution-subtitle {
+            color: white;
+            font-size: 8px;
+            line-height: 1.1;
+        }
+        
+        .credential-body {
+            padding: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: calc(100% - 50px);
+        }
+        
+        .student-section {
+            flex: 1;
+        }
+        
+        .photo-placeholder {
+            width: 40px;
+            height: 40px;
+            background: rgba(255,255,255,0.2);
+            border: 2px solid #d4af37;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            margin-bottom: 8px;
+        }
+        
+        .student-name {
+            font-size: 12px;
+            font-weight: bold;
+            color: #d4af37;
+            margin-bottom: 8px;
+            line-height: 1.1;
+        }
+        
+        .student-details {
+            font-size: 8px;
+            line-height: 1.3;
+        }
+        
+        .student-details div {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 2px;
+        }
+        
+        .qr-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .qr-code-img {
+            width: 60px;
+            height: 60px;
+            border: 2px solid #d4af37;
+            border-radius: 5px;
+            background: white;
+            padding: 3px;
+            /* Mejoras para impresión */
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+            filter: contrast(150%);
+        }
+        
+        /* Estilos específicos para impresión de alta calidad */
+        @media print {
+            .qr-code-img, .qr-code {
+                filter: contrast(300%) brightness(40%) !important;
+                -webkit-filter: contrast(300%) brightness(40%) !important;
+                image-rendering: pixelated !important;
+                image-rendering: -moz-crisp-edges !important;
+                image-rendering: crisp-edges !important;
+                background: white !important;
+                border: 3px solid #000 !important;
+                padding: 2mm !important;
+            }
+            
+            .credential {
+                page-break-inside: avoid !important;
+                -webkit-print-color-adjust: exact !important;
+                color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            
+            .qr-section {
+                background: white !important;
+                padding: 3mm !important;
+                border-radius: 2mm !important;
+                border: 2px solid #000 !important;
+            }
+            
+            /* Asegurar colores exactos en impresión */
+            body {
+                -webkit-print-color-adjust: exact !important;
+                color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            
+            /* QR extra grande para credenciales */
+            .credential .qr-code-img {
+                width: 20mm !important;
+                height: 20mm !important;
+                min-width: 20mm !important;
+                min-height: 20mm !important;
+            }
+        }
+        
+        .qr-label {
+            font-size: 6px;
+            color: #d4af37;
+            margin-top: 3px;
+            text-align: center;
+            font-weight: bold;
+            line-height: 1;
+        }
+        
+        .credential-footer {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0,0,0,0.3);
+            text-align: center;
+            padding: 3px;
+            font-size: 7px;
+            color: #d4af37;
+        }
+        
+        .bulk-section {
+            background: linear-gradient(135deg, #fff3cd, #fef7d1);
+            border: 2px solid #d4af37;
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 30px;
+        }
+        
+        .section-title {
+            color: #8b1538;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #d4af37;
+            padding-bottom: 8px;
+        }
+        
+        .csv-textarea {
+            width: 100%;
+            height: 150px;
+            padding: 15px;
+            border: 2px solid #8b1538;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 0.9em;
+            resize: vertical;
+            transition: border-color 0.3s ease;
+        }
+        
+        .csv-textarea:focus {
+            outline: none;
+            border-color: #d4af37;
+            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+        }
+        
+        .back-btn {
+            color: white;
+            text-decoration: none;
+            background: rgba(255,255,255,0.2);
+            padding: 8px 15px;
+            border-radius: 20px;
+            display: inline-block;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+        
+        .back-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-1px);
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        @media (max-width: 600px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .generator-container {
+                margin: 0;
+            }
+            
+            .form-section, .bulk-section {
+                margin: 15px;
+                padding: 20px;
+            }
+            
+            .credential {
+                width: 280px;
+                height: 180px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="generator-container">
+        <header class="app-header">
+            <!-- Header institucional -->
+            <div class="institutional-header">
+                <div class="logo-container">
+                    <div class="logo-placeholder">SEP</div>
+                </div>
+                
+                <div class="institution-info">
+                    <div class="institution-name">CETIS No. 45</div>
+                    <div class="institution-subtitle">Centro de Estudios Tecnológicos Industrial y de Servicios</div>
+                    <div class="institution-location">"José María Izazaga"</div>
+                </div>
+                
+                <div class="logo-container">
+                    <div class="logo-placeholder">DGETI</div>
+                </div>
+            </div>
+            
+            <h1 class="app-title">🎫 Generador de Credenciales</h1>
+            <a href="index.html" class="back-btn">← Volver al Control de Asistencia</a>
+        </header>
+
+        <main class="main-content">
+            <!-- Formulario -->
+            <div class="form-section">
+                <h2 class="section-title">👤 Generar credencial individual</h2>
+                
+                <form id="studentForm">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="matricula">📋 Matrícula:</label>
+                            <input type="text" id="matricula" class="form-input" placeholder="2508CETIS045G1P1001" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="nombre">👤 Nombre Completo:</label>
+                            <input type="text" id="nombre" class="form-input" placeholder="Juan Pérez García" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="grado">🎓 Grado:</label>
+                            <select id="grado" class="form-input" required>
+                                <option value="">Seleccionar...</option>
+                                <option value="1">1°</option>
+                                <option value="2">2°</option>
+                                <option value="3">3°</option>
+                                <option value="4">4°</option>
+                                <option value="5">5°</option>
+                                <option value="6">6°</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="grupo">👥 Grupo:</label>
+                            <select id="grupo" class="form-input" required>
+                                <option value="">Seleccionar...</option>
+                                <option value="A">A</option>
+                                <option value="B">B</option>
+                                <option value="C">C</option>
+                                <option value="D">D</option>
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="generate-btn">
+                        ✨ Generar Credencial
+                    </button>
+                </form>
+            </div>
+
+            <!-- Vista previa de credencial -->
+            <div id="credentialPreview" class="credential-preview hidden">
+                <h3 class="section-title">🎫 Credencial Generada</h3>
+                
+                <div class="credential" id="credential">
+                    <div class="credential-header">
+                        <div class="credential-logos">
+                            <div class="credential-logo">SEP</div>
+                            <div class="credential-institution">
+                                <div class="credential-institution-name">CETIS No. 45</div>
+                                <div class="credential-institution-subtitle">
+                                    Centro de Estudios Tecnológicos<br>
+                                    Industrial y de Servicios
+                                </div>
+                            </div>
+                            <div class="credential-logo">DG</div>
+                        </div>
+                    </div>
+                    
+                    <div class="credential-body">
+                        <div class="student-section">
+                            <div class="photo-placeholder">👤</div>
+                            <div class="student-name" id="credentialName">NOMBRE DEL ESTUDIANTE</div>
+                            <div class="student-details">
+                                <div>
+                                    <span>Matrícula:</span>
+                                    <span id="credentialMatricula">-</span>
+                                </div>
+                                <div>
+                                    <span>Grado:</span>
+                                    <span id="credentialGrado">-</span>
+                                </div>
+                                <div>
+                                    <span>Grupo:</span>
+                                    <span id="credentialGrupo">-</span>
+                                </div>
+                                <div>
+                                    <span>Ciclo:</span>
+                                    <span>2025-2026</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="qr-section">
+                            <img id="qrCodeImage" class="qr-code-img" src="" alt="Código QR">
+                            <div class="qr-label">CÓDIGO<br>ASISTENCIA</div>
+                        </div>
+                    </div>
+                    
+                    <div class="credential-footer">
+                        #OrgullosamenteCETIS45 | Sistema de Control de Asistencia
+                    </div>
+                </div>
+                
+                <div class="nav-buttons">
+                    <button class="nav-btn" onclick="printCredential()">
+                        🖨️ Imprimir Credencial
+                    </button>
+                    <button class="nav-btn" onclick="generatePDFCredential()">
+                        📄 Generar PDF
+                    </button>
+                </div>
+            </div>
+
+            <!-- Sección de generación masiva -->
+            <div class="bulk-section">
+                <h3 class="section-title">👥 Generación Masiva de Credenciales</h3>
+                <p style="margin-bottom: 15px; text-align: center; color: #8b1538;">
+                    <strong>Formato CSV:</strong> matricula,nombre,grado,grupo
+                </p>
+                
+                <textarea id="csvInput" class="csv-textarea" placeholder="2508CETIS045G1P1001,PÉREZ GARCÍA JUAN CARLOS,1,A
+2508CETIS045G1P1002,LÓPEZ MARTÍNEZ MARÍA FERNANDA,1,A
+2508CETIS045G1P1003,GONZÁLEZ RODRÍGUEZ LUIS MIGUEL,1,B"></textarea>
+                
+                <div class="nav-buttons" style="margin-top: 15px;">
+                    <button class="nav-btn" onclick="generateBulkCredentials()">
+                        🚀 Generar Credenciales Masivas
+                    </button>
+                    <button class="nav-btn" onclick="generateBulkPDF()">
+                        📋 PDF Múltiples (4 por hoja)
+                    </button>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer institucional -->
+        <footer class="app-footer">
+            <div class="footer-logos">
+                <div class="footer-logo">SEP</div>
+                <div class="footer-logo">45</div>
+                <div class="footer-logo">DG</div>
+            </div>
+            <div class="footer-text">
+                <strong>Generador de Credenciales Estudiantiles</strong><br>
+                CETIS No. 45 - Ciclo Escolar 2025-2026<br>
+                #OrgullosamenteCETIS45
+            </div>
+        </footer>
+    </div>
+
+    <script src="credenciales.js"></script>
+    <script>
+        // Función mejorada para generar QR con alta calidad de impresión
+        function generateQRURL(data, size = 300, margin = 1, errorLevel = 'M') {
+            const encodedData = encodeURIComponent(data);
+            // Parámetros optimizados para máxima nitidez en impresión
+            return `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodedData}&margin=${margin}&ecc=${errorLevel}&format=png&color=000000&bgcolor=FFFFFF`;
+        }
+
+        // Variables globales
+        let currentStudentData = null;
+
+        // Inicializar cuando el DOM esté listo
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🎫 Generador de credenciales CETIS 45 iniciado');
+            setupEventListeners();
+            showWelcomeMessage();
+        });
+
+        // Mostrar mensaje de bienvenida
+        function showWelcomeMessage() {
+            setTimeout(() => {
+                showNotification('🎫 Generador de Credenciales CETIS 45\n¡Crea credenciales profesionales para tus estudiantes!', 'info', 3000);
+            }, 1000);
+        }
+
+        // Event listeners mejorados
+        function setupEventListeners() {
+            const studentForm = document.getElementById('studentForm');
+            
+            if (studentForm) {
+                studentForm.addEventListener('submit', handleFormSubmit);
+            }
+            
+            console.log('✅ Event listeners del generador configurados');
+        }
+
+        // Manejar envío del formulario
+        function handleFormSubmit(event) {
+            event.preventDefault();
+            
+            const matricula = document.getElementById('matricula').value.trim();
+            const nombre = document.getElementById('nombre').value.trim().toUpperCase();
+            const grado = document.getElementById('grado').value;
+            const grupo = document.getElementById('grupo').value;
+            
+            if (!matricula || !nombre || !grado || !grupo) {
+                showNotification('⚠️ Por favor completa todos los campos', 'warning');
+                return;
+            }
+            
+            generateCredential({ matricula, nombre, grado, grupo });
+        }
+
+        // Generar credencial con QR optimizado
+        function generateCredential(studentData) {
+            // Actualizar información en la credencial
+            document.getElementById('credentialName').textContent = studentData.nombre;
+            document.getElementById('credentialMatricula').textContent = studentData.matricula;
+            document.getElementById('credentialGrado').textContent = studentData.grado + '°';
+            document.getElementById('credentialGrupo').textContent = studentData.grupo;
+            
+            // Generar QR con parámetros optimizados para impresión
+            const qrData = JSON.stringify(studentData);
+            const qrURL = generateQRURL(qrData, 300, 2, 'M'); // Tamaño 300px, margen 2, corrección media
+            
+            const qrImage = document.getElementById('qrCodeImage');
+            qrImage.src = qrURL;
+            qrImage.style.imageRendering = 'pixelated';
+            qrImage.style.filter = 'contrast(150%)';
+            
+            // Guardar datos actuales
+            currentStudentData = studentData;
+            
+            // Mostrar credencial
+            document.getElementById('credentialPreview').classList.remove('hidden');
+            
+            // Scroll hacia la credencial
+            document.getElementById('credentialPreview').scrollIntoView({ 
+                behavior: 'smooth' 
+            });
+            
+            // Notificación
+            showNotification(`✅ Credencial generada para ${studentData.nombre}\n📱 QR optimizado para impresión de alta calidad`, 'success');
+        }
+
+        // Imprimir credencial con QR optimizado
+        function printCredential() {
+            if (!currentStudentData) {
+                showNotification('⚠️ No hay credencial para imprimir', 'warning');
+                return;
+            }
+            
+            const qrData = JSON.stringify(currentStudentData);
+            const qrURL = generateQRURL(qrData, 400, 2, 'H'); // QR extra grande y máxima corrección para impresión
+            
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Credencial CETIS 45 - ${currentStudentData.nombre}</title>
+                    <style>
+                        @page { 
+                            size: A4; 
+                            margin: 15mm;
+                        }
+                        
+                        @media print {
+                            .qr-print {
+                                filter: contrast(300%) brightness(40%) !important;
+                                -webkit-filter: contrast(300%) brightness(40%) !important;
+                                image-rendering: pixelated !important;
+                                image-rendering: crisp-edges !important;
+                                background: white !important;
+                                border: 4px solid #000 !important;
+                            }
+                            
+                            body {
+                                -webkit-print-color-adjust: exact !important;
+                                color-adjust: exact !important;
+                                print-color-adjust: exact !important;
+                            }
+                            
+                            .credential-print {
+                                -webkit-print-color-adjust: exact !important;
+                                color-adjust: exact !important;
+                                print-color-adjust: exact !important;
+                            }
+                        }
+                        
+                        body { 
+                            font-family: Arial, sans-serif; 
+                            margin: 0;
+                            padding: 20px;
+                            background: white;
+                        }
+                        
+                        .print-header {
+                            text-align: center;
+                            background: linear-gradient(135deg, #8b1538, #a91d47);
+                            color: white;
+                            padding: 20px;
+                            border-radius: 10px;
+                            margin-bottom: 30px;
+                            -webkit-print-color-adjust: exact;
+                            color-adjust: exact;
+                        }
+                        
+                        .credential-container {
+                            display: flex;
+                            justify-content: center;
+                            align-items: center;
+                            margin: 30px 0;
+                        }
+                        
+                        .credential-print {
+                            width: 85.6mm;
+                            height: 53.98mm;
+                            background: linear-gradient(135deg, #8b1538, #a91d47);
+                            border: 3px solid #d4af37;
+                            border-radius: 8px;
+                            position: relative;
+                            overflow: hidden;
+                            color: white;
+                            font-family: Arial, sans-serif;
+                            transform: scale(2);
+                            -webkit-print-color-adjust: exact;
+                            color-adjust: exact;
+                        }
+                        
+                        .credential-header-print {
+                            background: rgba(212, 175, 55, 0.2);
+                            padding: 3mm;
+                            text-align: center;
+                            border-bottom: 1px solid #d4af37;
+                        }
+                        
+                        .institution-name-print {
+                            color: #d4af37;
+                            font-size: 10px;
+                            font-weight: bold;
+                            margin-bottom: 2px;
+                        }
+                        
+                        .institution-subtitle-print {
+                            color: white;
+                            font-size: 6px;
+                            line-height: 1.1;
+                        }
+                        
+                        .credential-body-print {
+                            padding: 3mm;
+                            display: flex;
+                            justify-content: space-between;
+                            align-items: center;
+                            height: calc(100% - 12mm);
+                        }
+                        
+                        .student-section-print {
+                            flex: 1;
+                        }
+                        
+                        .student-name-print {
+                            font-size: 8px;
+                            font-weight: bold;
+                            color: #d4af37;
+                            margin-bottom: 2mm;
+                            line-height: 1.1;
+                        }
+                        
+                        .student-details-print {
+                            font-size: 6px;
+                            line-height: 1.3;
+                            color: white;
+                        }
+                        
+                        .qr-section-print {
+                            display: flex;
+                            flex-direction: column;
+                            align-items: center;
+                        }
+                        
+                        .qr-print {
+                            width: 18mm;
+                            height: 18mm;
+                            border: 2px solid #d4af37;
+                            border-radius: 2mm;
+                            background: white;
+                            padding: 1mm;
+                            image-rendering: pixelated;
+                            image-rendering: crisp-edges;
+                        }
+                        
+                        .qr-label-print {
+                            font-size: 5px;
+                            color: #d4af37;
+                            margin-top: 1mm;
+                            text-align: center;
+                            font-weight: bold;
+                        }
+                        
+                        .credential-footer-print {
+                            position: absolute;
+                            bottom: 0;
+                            left: 0;
+                            right: 0;
+                            background: rgba(0,0,0,0.4);
+                            text-align: center;
+                            padding: 1mm;
+                            font-size: 5px;
+                            color: #d4af37;
+                        }
+                        
+                        .instructions {
+                            background: #fff3cd;
+                            border: 2px solid #ffc107;
+                            padding: 15px;
+                            border-radius: 10px;
+                            margin: 20px 0;
+                        }
+                        
+                        .no-print { display: block; }
+                        @media print { .no-print { display: none !important; } }
+                    </style>
+                </head>
+                <body>
+                    <div class="no-print">
+                        <div class="print-header">
+                            <h1>🎫 Credencial CETIS No. 45</h1>
+                            <p><strong>${currentStudentData.nombre}</strong></p>
+                            <button onclick="window.print()" style="background: #28a745; color: white; border: none; padding: 10px 20px; border-radius: 5px; margin: 5px; cursor: pointer;">🖨️ Imprimir</button>
+                            <button onclick="window.close()" style="background: #dc3545; color: white; border: none; padding: 10px 20px; border-radius: 5px; margin: 5px; cursor: pointer;">❌ Cerrar</button>
+                        </div>
+                        
+                        <div class="instructions">
+                            <h3 style="color: #856404; margin-bottom: 10px;">📋 Instrucciones de Impresión Óptima:</h3>
+                            <ul style="color: #856404; line-height: 1.6;">
+                                <li><strong>🖨️ Calidad:</strong> Configurar impresora en "Alta Calidad" o "Foto"</li>
+                                <li><strong>📄 Papel:</strong> Usar papel blanco de 80g/m² mínimo</li>
+                                <li><strong>🔧 DPI:</strong> 600 DPI o superior</li>
+                                <li><strong>⚫ Tinta:</strong> Verificar nivel de tinta negra al 100%</li>
+                                <li><strong>📏 Escala:</strong> Imprimir al 100% sin redimensionar</li>
+                                <li><strong>✂️ Corte:</strong> Dejar margen blanco alrededor del QR</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="credential-container">
+                        <div class="credential-print">
+                            <div class="credential-header-print">
+                                <div class="institution-name-print">CETIS No. 45</div>
+                                <div class="institution-subtitle-print">Centro de Estudios Tecnológicos<br>Industrial y de Servicios</div>
+                            </div>
+                            
+                            <div class="credential-body-print">
+                                <div class="student-section-print">
+                                    <div class="student-name-print">${currentStudentData.nombre}</div>
+                                    <div class="student-details-print">
+                                        <strong>Mat:</strong> ${currentStudentData.matricula}<br>
+                                        <strong>Grado:</strong> ${currentStudentData.grado}° <strong>Grupo:</strong> ${currentStudentData.grupo}<br>
+                                        <strong>Ciclo:</strong> 2025-2026
+                                    </div>
+                                </div>
+                                
+                                <div class="qr-section-print">
+                                    <img src="${qrURL}" alt="QR ${currentStudentData.nombre}" class="qr-print">
+                                    <div class="qr-label-print">CÓDIGO<br>ASISTENCIA</div>
+                                </div>
+                            </div>
+                            
+                            <div class="credential-footer-print">
+                                #OrgullosamenteCETIS45
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="no-print" style="text-align: center; margin-top: 30px; font-size: 12px; color: #666;">
+                        <p><strong>QR Optimizado para Impresión de Alta Calidad</strong></p>
+                        <p>Tamaño: 400x400px | Corrección de errores: Máxima | Formato: PNG</p>
+                        <p>Generado: ${new Date().toLocaleString('es-ES')}</p>
+                    </div>
+                </body>
+                </html>
+            `);
+            
+            printWindow.document.close();
+            showNotification('🖨️ Ventana de impresión abierta con QR optimizado\n📱 Configuración: Alta calidad, 400px, máxima corrección', 'success');
+        }
+
+        function generatePDFCredential() {
+            if (!currentStudentData) {
+                showNotification('⚠️ No hay credencial para generar PDF', 'warning');
+                return;
+            }
+            showNotification('📄 Función PDF en desarrollo', 'info');
+        }
+
+        function generateBulkCredentials() {
+            showNotification('🚀 Función de generación masiva en desarrollo', 'info');
+        }
+
+        function generateBulkPDF() {
+            showNotification('📋 Función PDF masivo en desarrollo', 'info');
+        }
+
+        // Mostrar notificación
+        function showNotification(message, type = 'success', duration = 4000) {
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            
+            let bgColor, borderColor, icon;
+            switch(type) {
+                case 'error':
+                    bgColor = 'linear-gradient(135deg, #dc3545, #c82333)';
+                    borderColor = '#721c24';
+                    icon = '❌';
+                    break;
+                case 'warning':
+                    bgColor = 'linear-gradient(135deg, #ffc107, #e0a800)';
+                    borderColor = '#856404';
+                    icon = '⚠️';
+                    break;
+                case 'info':
+                    bgColor = 'linear-gradient(135deg, #17a2b8, #138496)';
+                    borderColor = '#0c5460';
+                    icon = 'ℹ️';
+                    break;
+                default:
+                    bgColor = 'linear-gradient(135deg, #28a745, #20c997)';
+                    borderColor = '#155724';
+                    icon = '✅';
+            }
+            
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${bgColor};
+                color: white;
+                padding: 15px 20px;
+                border-radius: 12px;
+                box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+                z-index: 1000;
+                font-weight: 500;
+                border: 3px solid ${borderColor};
+                animation: slideIn 0.3s ease;
+                max-width: 350px;
+                white-space: pre-line;
+                font-family: 'Segoe UI', sans-serif;
+                line-height: 1.4;
+            `;
+            
+            notification.innerHTML = `<strong>${icon}</strong> ${message}`;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 300);
+            }, duration);
+        }
+
+        // Agregar estilos de animación
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            
+            @keyframes slideOut {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(100%); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
+
+        console.log('✅ Sistema de credenciales cargado completamente');
+    </script>
+</body>
+</html>
