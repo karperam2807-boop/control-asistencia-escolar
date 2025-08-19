@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control de Asistencia - CETIS 45</title>
+    <link rel="stylesheet" href="styles-unified.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsqr/1.4.0/jsQR.min.js"></script>
+    <style>
+        /* Estilos específicos para la integración con IndexedDB */
+        .contador-bd {
+            animation: slideIn 0.5s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        .info-bd {
+            margin: 10px 0;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+        }
+        
+        .resultado-header {
+            animation: fadeIn 0.3s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .registro-item {
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 6px;
+            border-left: 4px solid;
+            background: white;
+        }
+        
+        .registro-item.puntual { border-left-color: #28a745; background: #f8fff9; }
+        .registro-item.tolerancia { border-left-color: #ffc107; background: #fffef8; }
+        .registro-item.retardo { border-left-color: #dc3545; background: #fff8f8; }
+        .registro-item.critico { border-left-color: #721c24; background: #fff0f0; }
+        
+        .registro-info {
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+        
+        .registro-detalle {
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .lista-registros {
+            max-height: 400px;
+            overflow-y: auto;
+            margin: 15px 0;
+        }
+        
+        .estadisticas-bd {
+            background: linear-gradient(135deg, #003f7f, #0066cc);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .estadisticas-bd h4 {
+            margin: 0 0 10px 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .stats-grid-bd {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .stat-item-bd {
+            text-align: center;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+        }
+        
+        .stat-number-bd {
+            display: block;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        
+        .stat-label-bd {
+            font-size: 11px;
+            opacity: 0.9;
+        }
+        
+        .controles-debug {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #6c757d;
+        }
+        
+        .controles-debug h4 {
+            margin: 0 0 10px 0;
+            color: #495057;
+            font-size: 14px;
+        }
+        
+        .btn-debug {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            margin: 3px;
+        }
+        
+        .btn-debug:hover {
+            background: #5a6268;
+        }
+        
+        .alert {
+            animation: slideInAlert 0.3s ease-out;
+        }
+        
+        @keyframes slideInAlert {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        .scanner-status {
+            text-align: center;
+            margin: 20px 0;
+            font-weight: bold;
+        }
+        
+        .video-container {
+            position: relative;
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        #video {
+            max-width: 100%;
+            height: auto;
+            border: 2px solid #003f7f;
+            border-radius: 8px;
+        }
+        
+        .scanner-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 200px;
+            height: 200px;
+            border: 2px solid #ffc72c;
+            border-radius: 8px;
+            pointer-events: none;
+        }
+        
+        .scanner-overlay::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            border: 2px solid rgba(255, 199, 44, 0.3);
+            border-radius: 8px;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.05); opacity: 0.7; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        .acciones-resultado {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        @media (max-width: 768px) {
+            .contador-bd {
+                position: relative !important;
+                top: auto !important;
+                right: auto !important;
+                margin: 10px 0;
+            }
+            
+            .stats-grid-bd {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .acciones-resultado {
+                flex-direction: column;
+            }
+            
+            .video-container {
+                margin: 10px 0;
+            }
+            
+            .scanner-overlay {
+                width: 150px;
+                height: 150px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMjAiIGZpbGw9IiMwMDNmN2YiLz4KPHN2ZyB4PSI4IiB5PSI4IiB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSI+CjxwYXRoIGQ9Ik0xMiAyQzYuNDggMiAyIDYuNDggMiAxMlM2LjQ4IDIyIDEyIDIyIDIyIDE3LjUyIDIyIDEyUzE3LjUyIDIgMTIgMlpNMTMgMTdIMTFWMTVIMTNWMTdaTTEzIDEzSDExVjdIMTNWMTNaIiBmaWxsPSJ3aGl0ZSIvPgo8L3N2Zz4KPC9zdmc+" alt="CETIS 45" class="nav-logo">
+                <div class="nav-text">
+                    <span class="nav-title">CETIS No. 45</span>
+                    <span class="nav-subtitle">"José María Izazaga"</span>
+                </div>
+            </div>
+            
+            <div class="nav-menu">
+                <a href="index.html" class="nav-link active">📊 Control Asistencia</a>
+                <a href="credenciales.html" class="nav-link">🎫 Credenciales</a>
+                <a href="reportes.html" class="nav-link">📈 Reportes</a>
+                <a href="admin.html" class="nav-link">⚙️ Administración</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <header class="header">
+            <h1>📊 Control de Asistencia</h1>
+            <p>Sistema integrado con base de datos de alumnos</p>
+            <div class="fecha-actual">
+                📅 <span id="fechaActual"></span> | 
+                🕐 <span id="horaActual"></span>
+            </div>
+        </header>
+
+        <!-- Estadísticas de Base de Datos -->
+        <section class="estadisticas-bd">
+            <h4>🗄️ Estado de la Base de Datos</h4>
+            <div class="stats-grid-bd">
+                <div class="stat-item-bd">
+                    <span class="stat-number-bd" id="totalAlumnosBD">0</span>
+                    <span class="stat-label-bd">Alumnos Registrados</span>
+                </div>
+                <div class="stat-item-bd">
+                    <span class="stat-number-bd" id="alumnosConAsistenciaBD">0</span>
+                    <span class="stat-label-bd">Con Asistencias</span>
+                </div>
+                <div class="stat-item-bd">
+                    <span class="stat-number-bd" id="porcentajeVerificacion">0%</span>
+                    <span class="stat-label-bd">Verificación BD</span>
+                </div>
+                <div class="stat-item-bd">
+                    <span class="stat-number-bd" id="estadoBD">✅</span>
+                    <span class="stat-label-bd">Estado Sistema</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Escáner QR -->
+        <section class="scanner-section">
+            <div class="section-header">
+                <h2>📱 Escáner de Códigos QR</h2>
+                <p>Verificación automática contra base de datos de alumnos</p>
+            </div>
+            
+            <div class="scanner-controls">
+                <button id="iniciarEscaneo" class="btn btn-primary">📷 Iniciar Escáner</button>
+                <button id="detenerEscaneo" class="btn btn-danger" style="display: none;">🛑 Detener Escáner</button>
+            </div>
+            
+            <div class="scanner-status">
+                <span id="estadoEscaneo">📱 Listo para escanear</span>
+            </div>
+            
+            <div class="video-container">
+                <video id="video" autoplay style="display: none;"></video>
+                <div class="scanner-overlay" id="scannerOverlay" style="display: none;"></div>
+                <canvas id="canvas" style="display: none;"></canvas>
+            </div>
+            
+            <div id="resultadoEscaneo" style="display: none;"></div>
+        </section>
+
+        <!-- Estadísticas de Asistencia Hoy -->
+        <section class="stats-section">
+            <div class="section-header">
+                <h2>📈 Estadísticas de Hoy</h2>
+                <p>Resumen de asistencias del día actual</p>
+            </div>
+            
+            <div class="stats-grid">
+                <div class="stat-card puntual">
+                    <div class="stat-icon">✅</div>
+                    <div class="stat-content">
+                        <div class="stat-number" id="puntualesHoy">0</div>
+                        <div class="stat-label">Puntuales</div>
+                    </div>
+                </div>
+                
+                <div class="stat-card tolerancia">
+                    <div class="stat-icon">⚠️</div>
+                    <div class="stat-content">
+                        <div class="stat-number" id="toleranciaHoy">0</div>
+                        <div class="stat-label">Tolerancia</div>
+                    </div>
+                </div>
+                
+                <div class="stat-card retardo">
+                    <div class="stat-icon">🔴</div>
+                    <div class="stat-content">
+                        <div class="stat-number" id="retardosHoy">0</div>
+                        <div class="stat-label">Retardos</div>
+                    </div>
+                </div>
+                
+                <div class="stat-card total">
+                    <div class="stat-icon">📊</div>
+                    <div class="stat-content">
+                        <div class="stat-number" id="totalHoy">0</div>
+                        <div class="stat-label">Total Hoy</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Estadísticas Generales -->
+        <section class="stats-section">
+            <div class="section-header">
+                <h2>📋 Estadísticas Generales</h2>
+                <p>Resumen histórico del sistema</p>
+            </div>
+            
+            <div class="stats-grid">
+                <div class="stat-card info">
+                    <div class="stat-icon">🎯</div>
+                    <div class="stat-content">
+                        <div class="stat-number" id="totalGeneral">0</div>
+                        <div class="stat-label">Total Registros</div>
+                    </div>
+                </div>
+                
+                <div class="stat-card info">
+                    <div class="stat-icon">👥</div>
+                    <div class="stat-content">
+                        <div class="stat-number" id="estudiantesUnicos">0</div>
+                        <div class="stat-label">Estudiantes Únicos</div>
+                    </div>
+                </div>
+                
+                <div class="stat-card info">
+                    <div class="stat-icon">📅</div>
+                    <div class="stat-content">
+                        <div class="stat-number" id="diasActividad">0</div>
+                        <div class="stat-label">Días de Actividad</div>
+                    </div>
+                </div>
+                
+                <div class="stat-card info">
+                    <div class="stat-icon">⭐</div>
+                    <div class="stat-content">
+                        <div class="stat-number" id="promedioAsistencia">0</div>
+                        <div class="stat-label">Promedio/Día</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Control de Retardos -->
+        <section class="retardos-section">
+            <div class="section-header">
+                <h2>⏰ Control de Retardos Semanal</h2>
+                <p>Monitoreo automático del límite de 3 retardos por semana</p>
+            </div>
+            
+            <div class="retardos-info">
+                <div class="horario-info">
+                    <h4>🕐 Horario de Clases</h4>
+                    <div class="horario-detalle">
+                        <span>Entrada: 7:00 AM</span>
+                        <span>Tolerancia: 7:00 - 7:10 AM</span>
+                        <span>Retardo: Después de 7:10 AM</span>
+                    </div>
+                </div>
+                
+                <div id="contadorRetardos" class="contador-retardos">
+                    <div>📊 Retardos esta semana: 0</div>
+                    <div>⚠️ En riesgo: 0</div>
+                    <div>🚨 Críticos: 0</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Acciones Rápidas -->
+        <section class="acciones-section">
+            <div class="section-header">
+                <h2>⚡ Acciones Rápidas</h2>
+                <p>Herramientas para gestión y análisis</p>
+            </div>
+            
+            <div class="acciones-grid">
+                <button onclick="verUltimosRegistros()" class="btn btn-info">📊 Ver Últimos Registros</button>
+                <button onclick="exportarRegistrosCSV()" class="btn btn-success">📄 Exportar Hoy CSV</button>
+                <button onclick="mostrarEstadisticasCompletas()" class="btn btn-secondary">📈 Estadísticas Completas</button>
+                <button onclick="window.open('reportes.html', '_blank')" class="btn btn-primary">📊 Reportes Avanzados</button>
+                <button onclick="window.open('admin.html', '_blank')" class="btn btn-warning">⚙️ Panel Admin</button>
+                <button onclick="window.open('credenciales.html', '_blank')" class="btn btn-info">🎫 Generar Credenciales</button>
+            </div>
+        </section>
+
+        <!-- Herramientas de Debug -->
+        <section class="controles-debug">
+            <h4>🔧 Herramientas de Desarrollo y Debug</h4>
+            <div class="debug-grid">
+                <button onclick="testEscaneoQR()" class="btn-debug">🧪 Test QR</button>
+                <button onclick="testEscaneoQR('20240999')" class="btn-debug">🧪 Test Sin BD</button>
+                <button onclick="verEstadisticasDB()" class="btn-debug">📊 Stats BD</button>
+                <button onclick="limpiarAsistenciasHoy()" class="btn-debug">🗑️ Limpiar Hoy</button>
+                <button onclick="limpiarTodasAsistencias()" class="btn-debug">🗑️ Limpiar Todo</button>
+                <button onclick="location.reload()" class="btn-debug">🔄 Recargar</button>
+            </div>
+            <small style="color: #6c757d; font-style: italic;">
+                Funciones para pruebas y mantenimiento del sistema
+            </small>
+        </section>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>CETIS No. 45 "José María Izazaga"</h4>
+                    <p>Sistema de Control de Asistencia con Integración IndexedDB</p>
+                </div>
+                <div class="footer-section">
+                    <h4>📍 Ubicación</h4>
+                    <p>Zihuatanejo, Guerrero</p>
+                    <p>Ciclo Escolar 2024-2025</p>
+                </div>
+                <div class="footer-section">
+                    <h4>📞 Información</h4>
+                    <p>Sistema desarrollado para gestión académica</p>
+                    <p>Versión 2.0 con Base de Datos</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 CETIS 45. Sistema integrado de asistencia y gestión estudiantil.</p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        // Actualizar fecha y hora actual
+        function actualizarFechaHora() {
+            const ahora = new Date();
+            document.getElementById('fechaActual').textContent = ahora.toLocaleDateString('es-MX', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+            document.getElementById('horaActual').textContent = ahora.toLocaleTimeString('es-MX');
+        }
+        
+        // Actualizar cada segundo
+        actualizarFechaHora();
+        setInterval(actualizarFechaHora, 1000);
+        
+        // Mostrar/ocultar overlay del escáner cuando está activo
+        document.addEventListener('DOMContentLoaded', function() {
+            const video = document.getElementById('video');
+            const overlay = document.getElementById('scannerOverlay');
+            
+            // Observer para mostrar overlay cuando video esté visible
+            const observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+                        if (video.style.display !== 'none') {
+                            overlay.style.display = 'block';
+                        } else {
+                            overlay.style.display = 'none';
+                        }
+                    }
+                });
+            });
+            
+            observer.observe(video, { attributes: true });
+        });
+    </script>
+    <script src="app.js"></script>
+</body>
+</html>
