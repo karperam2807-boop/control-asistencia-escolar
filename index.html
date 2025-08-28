@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control de Asistencia - CETIS No. 45 "José María Izazaga" Zihuatanejo</title>
+    <link rel="stylesheet" href="styles-unified.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#8b1538">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="CETIS 45 - Asistencia">
+    <meta name="description" content="Sistema de Control de Asistencia Escolar con Control de Retardos - Centro de Estudios Tecnológicos Industrial y de Servicios No. 45 José María Izazaga - Zihuatanejo, Guerrero">
+</head>
+<body>
+    <div class="app-container">
+        <header class="app-header">
+            <!-- Header institucional con logos reales -->
+            <div class="institutional-header">
+                <div class="logo-container">
+                    <img src="logos/sep-logo.png" alt="SEP" class="logo-sep" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <div class="logo-placeholder logo-sep" style="display: none;"></div>
+                </div>
+                
+                <div class="institution-info">
+                    <img src="logos/cetis45-logo.png" alt="CETIS 45" class="logo-cetis-center" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <div class="logo-cetis-center" style="display: none;"></div>
+                    
+                    <div class="institution-name">CETIS No. 45 "José María Izazaga"</div>
+                    <div class="institution-subtitle">Centro de Estudios Tecnológicos Industrial y de Servicios</div>
+                    <div class="institution-location">Zihuatanejo, Guerrero</div>
+                </div>
+                
+                <div class="logo-container">
+                    <img src="logos/dgeti-logo.png" alt="DGETI" class="logo-dgeti" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <div class="logo-placeholder logo-dgeti" style="display: none;"></div>
+                </div>
+            </div>
+            
+            <h1 class="app-title">Control de Asistencia con Retardos</h1>
+            <div class="date-display" id="currentDate"></div>
+            
+            <!-- Panel de configuración de retardos ACTUALIZADO -->
+            <div class="retardo-config">
+                <span class="config-item">Tolerancia: <strong>10 min</strong></span>
+                <span class="config-item">Límite: <strong>3 retardos/semana</strong></span>
+                <span class="config-item">Horario: <strong>7:00 AM - 2:00 PM</strong></span>
+                <span class="config-item">Credenciales: <strong>QRious Tech</strong></span>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <!-- Sección de escaneo mejorada -->
+            <div class="scan-section">
+                <button id="scanButton" class="scan-btn">
+                    Escanear Código QR
+                </button>
+                <div class="scan-description">
+                    Acerca el código QR del estudiante a la cámara<br>
+                    <small style="color: #8b1538; font-weight: 600; margin-top: 5px; display: block;">
+                        Control automático de retardos activado (7:00 AM)
+                    </small>
+                </div>
+                <div id="camera-container" class="camera-container hidden">
+                    <video id="video" autoplay></video>
+                    <canvas id="canvas" class="hidden"></canvas>
+                    <button id="stopScanBtn" class="stop-btn">Cerrar Cámara</button>
+                </div>
+            </div>
+
+            <!-- Lista de registros mejorada con indicadores de retardo - MOVIDA ARRIBA -->
+            <div class="records-section">
+                <h2 class="section-title">Registros de Hoy con Control de Retardos</h2>
+                <div id="recordsList" class="records-list">
+                    <div class="no-records">
+                        <strong>Listo para escanear!</strong><br>
+                        No hay registros aún. Escanea el primer código QR para comenzar.<br>
+                        <small style="color: #8b1538; margin-top: 10px; display: block;">
+                            Control de retardos automático activado<br>
+                            #OrgullosamenteCETIS45
+                        </small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Estadísticas del día mejoradas con retardos - MOVIDA ABAJO -->
+            <div class="stats-section">
+                <h2 class="section-title">Estadísticas de Hoy</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalStudents">0</div>
+                        <div class="stat-label">Estudiantes</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalEntries">0</div>
+                        <div class="stat-label">Entradas</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalExits">0</div>
+                        <div class="stat-label">Salidas</div>
+                    </div>
+                    <div class="stat-card retardo-stat">
+                        <div class="stat-number" id="totalRetardos">0</div>
+                        <div class="stat-label">Retardos Hoy</div>
+                    </div>
+                </div>
+                
+                <!-- Alerta de tolerancia ACTUALIZADA -->
+                <div class="tolerance-alert">
+                    <h3>Sistema de Control de Retardos - CETIS No. 45</h3>
+                    <div class="tolerance-info">
+                        <div class="tolerance-item puntual">
+                            <span class="tolerance-icon">✅</span>
+                            <span class="tolerance-text">PUNTUAL: Antes de 7:00 AM</span>
+                        </div>
+                        <div class="tolerance-item tolerancia">
+                            <span class="tolerance-icon">⏱️</span>
+                            <span class="tolerance-text">TOLERANCIA: 7:00 - 7:10 AM</span>
+                        </div>
+                        <div class="tolerance-item retardo">
+                            <span class="tolerance-icon">⚠️</span>
+                            <span class="tolerance-text">RETARDO: Después de 7:10 AM</span>
+                        </div>
+                        <div class="tolerance-item critico">
+                            <span class="tolerance-icon">🚨</span>
+                            <span class="tolerance-text">CRÍTICO: 3+ retardos/semana</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Botón destacado para Panel Admin -->
+            <button id="adminBtn" class="nav-btn admin-btn">
+                Panel Admin
+            </button>
+
+            <!-- Botones de navegación mejorados con credenciales optimizadas -->
+            <div class="nav-buttons">
+                <button id="reportsBtn" class="nav-btn">
+                    Ver Reportes
+                </button>
+                <button id="retardosBtn" class="nav-btn retardo-btn">
+                    Reporte Retardos
+                </button>
+                <button id="credencialesOptBtn" class="nav-btn credentials-optimized-btn">
+                    Credenciales Optimizadas
+                </button>
+                <button id="exportBtn" class="nav-btn">
+                    Exportar Datos
+                </button>
+                <button id="generatorBtn" class="nav-btn">
+                    Generar Códigos QR
+                </button>
+                <button id="helpBtn" class="nav-btn">
+                    Ayuda
+                </button>
+                <button id="testBtn" class="nav-btn test-btn" style="display: none;">
+                    Test Retardo
+                </button>
+            </div>
+
+            <!-- Sección informativa sobre credenciales optimizadas -->
+            <div class="feature-highlight" style="background: linear-gradient(135deg, #e8f5e8, #d4edda); border: 3px solid #28a745; border-radius: 20px; padding: 25px; margin: 30px 0; text-align: center;">
+                <h3 style="color: #155724; margin-bottom: 15px; font-size: 1.4em; font-weight: 700;">
+                    Sistema de Credenciales Optimizadas
+                </h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin: 20px 0;">
+                    <div style="background: white; padding: 15px; border-radius: 10px; border: 2px solid #28a745;">
+                        <div style="font-size: 1.8em; font-weight: 900; color: #28a745; margin-bottom: 5px;">9</div>
+                        <div style="font-size: 0.9em; color: #155724; font-weight: 600;">Credenciales por Hoja A4</div>
+                    </div>
+                    <div style="background: white; padding: 15px; border-radius: 10px; border: 2px solid #28a745;">
+                        <div style="font-size: 1.8em; font-weight: 900; color: #28a745; margin-bottom: 5px;">98%</div>
+                        <div style="font-size: 0.9em; color: #155724; font-weight: 600;">Aprovechamiento Papel</div>
+                    </div>
+                    <div style="background: white; padding: 15px; border-radius: 10px; border: 2px solid #28a745;">
+                        <div style="font-size: 1.8em; font-weight: 900; color: #28a745; margin-bottom: 5px;">400px</div>
+                        <div style="font-size: 0.9em; color: #155724; font-weight: 600;">QR Quality (QRious)</div>
+                    </div>
+                    <div style="background: white; padding: 15px; border-radius: 10px; border: 2px solid #28a745;">
+                        <div style="font-size: 1.8em; font-weight: 900; color: #28a745; margin-bottom: 5px;">125%</div>
+                        <div style="font-size: 0.9em; color: #155724; font-weight: 600;">Más Eficiente</div>
+                    </div>
+                </div>
+                <p style="color: #155724; font-weight: 600; margin-top: 15px; line-height: 1.6;">
+                    <strong>Tecnología QRious 4.0.2</strong> | Códigos QR de máxima calidad | Optimización ecológica
+                    <br>Ahorro de papel del 58% | 300 DPI equivalente | Compatible con impresoras profesionales
+                </p>
+            </div>
+        </main>
+
+        <!-- Footer institucional mejorado -->
+        <footer class="app-footer">
+            <div class="footer-logos">
+                <img src="logos/sep-logo.png" alt="SEP" class="footer-logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                <div class="footer-logo" style="display: none;">SEP</div>
+                
+                <img src="logos/cetis45-logo.png" alt="CETIS 45" class="footer-logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                <div class="footer-logo" style="display: none;">45</div>
+                
+                <img src="logos/dgeti-logo.png" alt="DGETI" class="footer-logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                <div class="footer-logo" style="display: none;">DGETI</div>
+            </div>
+            <div class="footer-text">
+                <strong>Sistema de Control de Asistencia con Control de Retardos</strong><br>
+                <strong>CETIS No. 45 "José María Izazaga"</strong><br>
+                Zihuatanejo, Guerrero - Ciclo Escolar 2025-2026<br>
+                Tolerancia: 10 min | Límite: 3 retardos/semana | Horario: 7:00-14:00<br>
+                Credenciales Optimizadas con Tecnología QRious | 98% Aprovechamiento<br>
+                #OrgullosamenteCETIS45
+            </div>
+        </footer>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+    <script src="app.js"></script>
+    
+    <script>
+        // Event listeners para los botones con credenciales optimizadas
+        document.addEventListener('DOMContentLoaded', function() {
+            const generatorBtn = document.getElementById('generatorBtn');
+            const helpBtn = document.getElementById('helpBtn');
+            const reportsBtn = document.getElementById('reportsBtn');
+            const retardosBtn = document.getElementById('retardosBtn');
+            const testBtn = document.getElementById('testBtn');
+            const credencialesOptBtn = document.getElementById('credencialesOptBtn');
+            
+            // Botón generador de códigos QR
+            if (generatorBtn) {
+                generatorBtn.addEventListener('click', function() {
+                    console.log('Navegando al generador de códigos QR...');
+                    window.location.href = 'generador.html';
+                });
+            }
+            
+            // Botón de reportes
+            if (reportsBtn) {
+                reportsBtn.addEventListener('click', function() {
+                    console.log('Navegando a reportes...');
+                    window.location.href = 'reportes.html';
+                });
+            }
+            
+            // Botón de reportes de retardos
+            if (retardosBtn) {
+                retardosBtn.addEventListener('click', function() {
+                    console.log('Mostrando reporte de retardos...');
+                    if (typeof mostrarReporteRetardos === 'function') {
+                        mostrarReporteRetardos();
+                    } else {
+                        setTimeout(() => mostrarReporteRetardos(), 500);
+                    }
+                });
+            }
+            
+            // NUEVO: Botón de credenciales optimizadas
+            if (credencialesOptBtn) {
+                credencialesOptBtn.addEventListener('click', function() {
+                    console.log('Navegando a credenciales optimizadas con QRious...');
+                    
+                    // Mostrar notificación de transición
+                    if (typeof showNotification === 'function') {
+                        showNotification('Accediendo a Credenciales Optimizadas\nTecnología QRious 4.0.2\n9 credenciales por hoja A4\n98% aprovechamiento de papel', 'info', 3000);
+                    }
+                    
+                    // Navegar después de mostrar la notificación
+                    setTimeout(() => {
+                        window.location.href = 'credenciales-optimizadas.html';
+                    }, 1000);
+                });
+            }
+            
+            // Botón de ayuda
+            if (helpBtn) {
+                helpBtn.addEventListener('click', function() {
+                    showHelpModal();
+                });
+            }
+            
+            // Botón de test (solo en desarrollo)
+            if (testBtn && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
+                testBtn.style.display = 'inline-block';
+                testBtn.addEventListener('click', function() {
+                    console.log('Ejecutando test de retardo...');
+                    if (typeof testRetardo === 'function') {
+                        testRetardo();
+                    }
+                });
+            }
+            
+            // Actualizar estadísticas de retardos
+            updateRetardosStats();
+            
+            // Actualizar cada 30 segundos
+            setInterval(updateRetardosStats, 30000);
+            
+            console.log('Event listeners con credenciales optimizadas configurados');
+        });
+        
+        // Función para actualizar estadísticas de retardos
+        function updateRetardosStats() {
+            try {
+                const today = new Date().toISOString().split('T')[0];
+                const records = JSON.parse(localStorage.getItem('attendanceRecords') || '[]');
+                const todaysRecords = records.filter(record => record.fecha === today);
+                
+                // Contar retardos de hoy
+                const retardosHoy = todaysRecords.filter(record => record.esRetardo === true).length;
+                
+                const retardosStat = document.getElementById('totalRetardos');
+                if (retardosStat) {
+                    retardosStat.textContent = retardosHoy.toString();
+                    
+                    // Cambiar color según cantidad de retardos
+                    const statCard = retardosStat.closest('.stat-card');
+                    if (statCard) {
+                        if (retardosHoy === 0) {
+                            statCard.style.background = 'linear-gradient(135deg, #28a745, #20c997)';
+                        } else if (retardosHoy <= 3) {
+                            statCard.style.background = 'linear-gradient(135deg, #ffc107, #e0a800)';
+                        } else {
+                            statCard.style.background = 'linear-gradient(135deg, #dc3545, #c82333)';
+                        }
+                    }
+                }
+            } catch (error) {
+                console.log('Error actualizando estadísticas de retardos:', error);
+            }
+        }
+        
+        // Función de ayuda mejorada con información de credenciales optimizadas
+        function showHelpModal() {
+            const helpContent = `
+SISTEMA DE CONTROL DE ASISTENCIA
+   CETIS No. 45 "José María Izazaga"
+   CON CONTROL DE RETARDOS Y CREDENCIALES OPTIMIZADAS
+
+COMO USAR:
+1. Presiona "Escanear Código QR"
+2. Permite acceso a la cámara
+3. Acerca el código del estudiante
+4. Primera lectura = ENTRADA
+5. Segunda lectura = SALIDA
+
+CONTROL DE RETARDOS:
+• Hora oficial: 7:00 AM
+• Hora de salida: 2:00 PM
+• Tolerancia: 10 minutos (7:00-7:10)
+• Límite semanal: 3 retardos
+• Alertas automáticas
+
+TIPOS DE ALERTAS:
+• PUNTUAL: Antes de 7:00 AM
+• TOLERANCIA: 7:00 - 7:10 AM  
+• RETARDO: Después de 7:10 AM
+• CRÍTICO: 3+ retardos por semana
+
+CREDENCIALES OPTIMIZADAS:
+• Tecnología QRious 4.0.2
+• 9 credenciales por hoja A4
+• 98% aprovechamiento de papel
+• QR codes 400px (300 DPI equiv.)
+• 125% más eficiente que formato anterior
+• Ahorro del 58% en papel
+
+GENERAR CODIGOS QR:
+• Individual: Un estudiante a la vez
+• Masivo: Lista completa en CSV
+• Credenciales profesionales para imprimir
+• Credenciales optimizadas con QRious
+
+REPORTES DISPONIBLES:
+• Estadísticas diarias en tiempo real
+• Reporte de retardos semanal
+• Filtros por fecha específica
+• Exportación a Excel/PDF con retardos
+
+CONSEJOS IMPORTANTES:
+• Mantén buena iluminación para escanear
+• Los datos se guardan automáticamente
+• Funciona sin internet después de cargar
+• El control de retardos es automático
+• Usa códigos QR generados por el sistema
+• Las credenciales optimizadas ofrecen máxima calidad
+
+SOPORTE TÉCNICO:
+• Dirección del CETIS No. 45
+• Departamento de Sistemas
+• #OrgullosamenteCETIS45
+
+FORMATO DE CÓDIGO QR:
+{"matricula":"123","nombre":"Juan Pérez","grado":"1","grupo":"A"}
+            `;
+            
+            // Mostrar notificación en lugar de alert
+            if (typeof showNotification === 'function') {
+                showNotification(helpContent, 'info', 15000);
+            } else {
+                alert(helpContent);
+            }
+        }
+        
+        console.log('Sistema CETIS 45 - Index con Control de Retardos y Credenciales Optimizadas cargado');
+        console.log('Configuración automática de retardos aplicada: 7:00 AM - 2:00 PM');
+        console.log('Estadísticas de retardos en tiempo real habilitadas');
+        console.log('Integración con Credenciales Optimizadas (QRious 4.0.2) activada');
+    </script>
+</body>
+</html>
